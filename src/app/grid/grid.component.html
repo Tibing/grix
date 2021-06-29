@@ -1,0 +1,21 @@
+<div
+  grid-item
+  *ngFor="let item of items"
+  [x]="item.x"
+  [y]="item.y"
+  [w]="item.w"
+  [h]="item.h"
+  (dragStart)="placeholder$.next($event)"
+  (potentialPosition)="placeholder$.next($event)"
+  (dragStop)="commitMove(item, $event)"
+></div>
+
+<div
+  grid-item
+  *ngIf="placeholder$ | async as placeholder"
+  [placeholder]="true"
+  [x]="placeholder.x"
+  [y]="placeholder.y"
+  [w]="placeholder.w"
+  [h]="placeholder.h"
+></div>

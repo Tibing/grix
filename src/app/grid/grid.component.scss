@@ -1,0 +1,15 @@
+:host {
+  position: relative;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+
+  $dot-color: black;
+  $grid-dots: radial-gradient(circle at 1px 1px, $dot-color 1px, transparent 0);
+
+  background-image: $grid-dots;
+  background-size: 4.16% 22px;
+  margin-left: -1px;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}

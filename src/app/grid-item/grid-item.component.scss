@@ -1,0 +1,36 @@
+:host {
+  position: absolute;
+  border: 2px solid lightsalmon;
+  border-radius: 4px;
+  background: darkorchid;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow 0.3s, transform 0.3s;
+  z-index: 1;
+}
+
+:host:hover {
+  box-shadow: 12px 12px 2px 1px rgba(0, 0, 255, .2);
+  user-select: none;
+  cursor: pointer;
+}
+
+:host:active {
+  box-shadow: 6px 6px 2px 1px rgba(0, 0, 255, .2);
+}
+
+:host.dragging {
+  box-shadow: none;
+  transform: scale(0.87);
+}
+
+:host.placeholder {
+  border: none;
+  background: rgba(0, 0, 255, .2);
+  z-index: 0;
+  transition: left 0.1s, top 0.1s;
+}
