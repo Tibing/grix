@@ -1,1 +1,9 @@
-{{w}} x {{h}}
+<ng-container *ngIf="!items.length">
+  {{w}} x {{h}}
+</ng-container>
+
+<ng-container *ngIf="!!items.length">
+  <app-grid [items]="items"
+            [level]="level + 1"
+  ></app-grid>
+</ng-container>

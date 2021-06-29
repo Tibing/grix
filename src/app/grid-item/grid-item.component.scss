@@ -14,13 +14,8 @@
 }
 
 :host:hover {
-  box-shadow: 12px 12px 2px 1px rgba(0, 0, 255, .2);
   user-select: none;
   cursor: pointer;
-}
-
-:host:active {
-  box-shadow: 6px 6px 2px 1px rgba(0, 0, 255, .2);
 }
 
 :host.dragging {

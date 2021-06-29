@@ -5,6 +5,8 @@
   [y]="item.y"
   [w]="item.w"
   [h]="item.h"
+  [items]="item.items"
+  [level]="level"
   (dragStart)="placeholder$.next($event)"
   (potentialPosition)="placeholder$.next($event)"
   (dragStop)="commitMove(item, $event)"
@@ -18,4 +20,5 @@
   [y]="placeholder.y"
   [w]="placeholder.w"
   [h]="placeholder.h"
+  [level]="level"
 ></div>

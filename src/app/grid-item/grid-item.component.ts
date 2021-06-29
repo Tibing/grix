@@ -8,7 +8,7 @@ import {
   OnDestroy,
   Output,
 } from '@angular/core';
-import { GRID_COLUMN_WIDTH, GRID_ROW_HEIGHT, GridItem } from '../const';
+import { GRID_COLUMN_WIDTH, GRID_ROW_HEIGHT, GridItem, GridItems } from '../const';
 import { fromEvent, Observable, Subject } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
 import { switchMap, takeUntil, tap } from 'rxjs/operators';
@@ -23,6 +23,8 @@ export class GridItemComponent implements OnDestroy {
   @Input() y: number = 0;
   @Input() w: number = 0;
   @Input() h: number = 0;
+  @Input() items: GridItems = [];
+  @Input() level: number = 0;
 
   @Input() placeholder: boolean = false;
 
@@ -42,22 +44,30 @@ export class GridItemComponent implements OnDestroy {
 
   @HostBinding('style.left.px')
   get left(): number {
-    return this.x * GRID_COLUMN_WIDTH;
+    return this.x * this.GRID_COLUMN_WIDTH_LEVEL_BIASED;
   }
 
   @HostBinding('style.top.px')
   get top(): number {
-    return this.y * GRID_ROW_HEIGHT;
+    return this.y * this.GRID_ROW_HEIGHT_LEVEL_BIASED;
   }
 
   @HostBinding('style.width.px')
   get width(): number {
-    return this.w * GRID_COLUMN_WIDTH;
+    return this.w * this.GRID_COLUMN_WIDTH_LEVEL_BIASED;
   }
 
   @HostBinding('style.height.px')
   get height(): number {
-    return this.h * GRID_ROW_HEIGHT;
+    return this.h * this.GRID_ROW_HEIGHT_LEVEL_BIASED;
+  }
+
+  get GRID_COLUMN_WIDTH_LEVEL_BIASED(): number {
+    return GRID_COLUMN_WIDTH / (this.level || 1);
+  }
+
+  get GRID_ROW_HEIGHT_LEVEL_BIASED(): number {
+    return GRID_ROW_HEIGHT;
   }
 
   private destroy$: Subject<void> = new Subject<void>();
@@ -68,14 +78,17 @@ export class GridItemComponent implements OnDestroy {
     const el: HTMLElement = elementRef.nativeElement;
     const dragStart: Observable<MouseEvent> = fromEvent<MouseEvent>(el, 'mousedown')
       .pipe(
-        tap(() => {
+        tap((event: MouseEvent) => {
+          event.stopPropagation();
           this.dragging = true;
-          this.dragStart.emit({ x: this.x, y: this.y, w: this.w, h: this.h });
+          lastPotentialPosition = { x: this.x, y: this.y, w: this.w, h: this.h, items: this.items };
+          this.dragStart.emit(lastPotentialPosition);
         }),
       );
     const dragStop: Observable<MouseEvent> = fromEvent<MouseEvent>(document, 'mouseup')
       .pipe(
         tap((event: MouseEvent) => {
+          event.stopPropagation();
           this.dragging = false;
           this.dragStop.emit(lastPotentialPosition);
         }),
@@ -84,25 +97,34 @@ export class GridItemComponent implements OnDestroy {
     dragStart
       .pipe(
         switchMap((dragStartEvent: MouseEvent) => {
-          const offset: {x: number, y: number} = {
-            x: dragStartEvent.pageX - +el.style.left.split('px')[0],
-            y: dragStartEvent.pageY - +el.style.top.split('px')[0],
+          let bounds = el.parentElement!.getBoundingClientRect();
+          let parentX = dragStartEvent.clientX - bounds.left;
+          let parentY = dragStartEvent.clientY - bounds.top;
+          const cursorOffset: {x: number, y: number} = {
+            x: parentX - +el.style.left.split('px')[0],
+            y: parentY - +el.style.top.split('px')[0],
           }
           return fromEvent<MouseEvent>(document, 'mousemove')
             .pipe(
               takeUntil(dragStop),
               tap((event: MouseEvent) => {
-                const newX: number = event.pageX - offset.x;
-                const newY: number = event.pageY - offset.y;
+                let bounds = el.parentElement!.getBoundingClientRect();
+                let parentX = event.clientX - bounds.left;
+                let parentY = event.clientY - bounds.top;
+                const newX: number = parentX - cursorOffset.x;
+                const newY: number = parentY - cursorOffset.y;
                 el.style.left = `${newX}px`;
                 el.style.top = `${newY}px`;
                 lastPotentialPosition = {
-                  x: this.mod(newX + GRID_COLUMN_WIDTH / 2, GRID_COLUMN_WIDTH),
+                  x: this.mod(newX + this.GRID_COLUMN_WIDTH_LEVEL_BIASED / 2, this.GRID_COLUMN_WIDTH_LEVEL_BIASED),
                   y: this.mod(newY + GRID_ROW_HEIGHT / 2, GRID_ROW_HEIGHT),
-                  w: this.w,
-                  h: this.h,
+                  w: this.w ,
+                  h: this.h ,
+                  items: this.items,
                 };
-                this.potentialPosition.emit(lastPotentialPosition);
+                this.potentialPosition.emit({
+                  ...lastPotentialPosition,
+                });
               }),
             );
         }),

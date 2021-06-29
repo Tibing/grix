@@ -9,11 +9,11 @@ import { Subject } from 'rxjs';
 })
 export class GridComponent {
   @Input() items: GridItems = [];
+  @Input() level: number = 1;
 
   placeholder$: Subject<GridItem | null> = new Subject<GridItem | null>();
 
   commitMove(oldPosition: GridItem, newPosition: GridItem): void {
-    debugger;
     this.placeholder$.next(null);
     const index: number = this.items.findIndex((item: GridItem) => {
       return item.x === oldPosition.x &&

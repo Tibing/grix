@@ -6,5 +6,6 @@ export interface GridItem {
   y: number;
   w: number;
   h: number;
+  items: GridItems;
 }
 export type GridItems = GridItem[];
