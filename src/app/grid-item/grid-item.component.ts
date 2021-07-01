@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -17,6 +19,7 @@ import { switchMap, takeUntil, tap } from 'rxjs/operators';
   selector: '[grid-item]',
   templateUrl: './grid-item.component.html',
   styleUrls: ['./grid-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GridItemComponent implements OnDestroy {
   @Input() x: number = 0;
@@ -73,7 +76,7 @@ export class GridItemComponent implements OnDestroy {
   private destroy$: Subject<void> = new Subject<void>();
   private dragging: boolean = false;
 
-  constructor(elementRef: ElementRef, @Inject(DOCUMENT) document: Document) {
+  constructor(elementRef: ElementRef, @Inject(DOCUMENT) document: Document, cd: ChangeDetectorRef) {
     let lastPotentialPosition!: GridItem;
     const el: HTMLElement = elementRef.nativeElement;
     const dragStart: Observable<MouseEvent> = fromEvent<MouseEvent>(el, 'mousedown')
@@ -81,8 +84,9 @@ export class GridItemComponent implements OnDestroy {
         tap((event: MouseEvent) => {
           event.stopPropagation();
           this.dragging = true;
-          lastPotentialPosition = { x: this.x, y: this.y, w: this.w, h: this.h, items: this.items };
+          lastPotentialPosition = { id: Math.random(), x: this.x, y: this.y, w: this.w, h: this.h, items: this.items };
           this.dragStart.emit(lastPotentialPosition);
+          cd.markForCheck();
         }),
       );
     const dragStop: Observable<MouseEvent> = fromEvent<MouseEvent>(document, 'mouseup')
@@ -91,6 +95,7 @@ export class GridItemComponent implements OnDestroy {
           event.stopPropagation();
           this.dragging = false;
           this.dragStop.emit(lastPotentialPosition);
+          cd.markForCheck();
         }),
       );
 
@@ -116,6 +121,7 @@ export class GridItemComponent implements OnDestroy {
                 el.style.left = `${newX}px`;
                 el.style.top = `${newY}px`;
                 lastPotentialPosition = {
+                  ...lastPotentialPosition,
                   x: this.mod(newX + this.GRID_COLUMN_WIDTH_LEVEL_BIASED / 2, this.GRID_COLUMN_WIDTH_LEVEL_BIASED),
                   y: this.mod(newY + GRID_ROW_HEIGHT / 2, GRID_ROW_HEIGHT),
                   w: this.w ,

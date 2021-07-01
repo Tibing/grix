@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow 0.3s, transform 0.3s;
+  transition: box-shadow 0.3s, transform 0.3s, top 0.3s, left 0.3s;
   z-index: 1;
 }
 
@@ -21,6 +21,7 @@
 :host.dragging {
   box-shadow: none;
   transform: scale(0.87);
+  transition: box-shadow 0.3s, transform 0.3s;
 }
 
 :host.placeholder {

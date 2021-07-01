@@ -1,14 +1,14 @@
 <div
   grid-item
-  *ngFor="let item of items"
+  *ngFor="let item of items; trackBy: track"
   [x]="item.x"
   [y]="item.y"
   [w]="item.w"
   [h]="item.h"
   [items]="item.items"
   [level]="level"
-  (dragStart)="placeholder$.next($event)"
-  (potentialPosition)="placeholder$.next($event)"
+  (dragStart)="startMove($event)"
+  (potentialPosition)="movePlaceholder(item, $event)"
   (dragStop)="commitMove(item, $event)"
 ></div>
 
